@@ -8,6 +8,8 @@ import { MessageModule } from './message/message.module';
 import { config } from 'dotenv';
 
 import { MongooseModule } from '@nestjs/mongoose';
+import { TokenModule } from './token/token.module';
+import { AuthModule } from './auth/auth.module';
 
 config();
 @Module({
@@ -17,6 +19,8 @@ config();
     RoomModule,
     MessageModule,
     MongooseModule.forRoot(process.env.MONGODB_URL),
+    TokenModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

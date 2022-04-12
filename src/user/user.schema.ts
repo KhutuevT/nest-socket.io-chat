@@ -5,13 +5,16 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-  @Prop({ required: true, default: 'Anonymous' })
+  @Prop({ required: true, default: 'Anonymous', unique: true })
   email: string;
 
-  @Prop()
+  @Prop({ default: 'Anonymous' })
+  password?: string;
+
+  @Prop({ required: true, default: 'Anonymous' })
   firstName: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: 'Anonymous' })
   lastName: string;
 
   @Prop({ required: true, default: 'default.png' })
