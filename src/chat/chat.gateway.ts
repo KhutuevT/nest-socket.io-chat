@@ -31,6 +31,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // pass
   }
 
+  @SubscribeMessage('test')
+  onTest(@MessageBody('test') test: string) {
+    console.log(test);
+    return test;
+  }
+
   @SubscribeMessage('createRoom')
   onCreateRoom(@MessageBody('roomId') roomId: number) {
     // pass
