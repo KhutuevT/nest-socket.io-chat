@@ -1,10 +1,10 @@
-import { ChatModule } from './chat/chat.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { config } from 'dotenv';
 
 config();
 
+import { ChatModule } from './chat/chat.module';
 import { RoomModule } from './room/room.module';
 import { AppService } from './app.service';
 import { GoogleAuthModule } from './google-auth/google-auth.module';

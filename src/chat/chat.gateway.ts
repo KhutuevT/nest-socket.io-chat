@@ -11,8 +11,8 @@ import {
 import { ClientRequest } from 'http';
 import { Socket, Server } from 'socket.io';
 // import { MessageService } from 'src/message/message.service';
-import { RoomService } from 'src/room/room.service';
-import { UserService } from 'src/user/user.service';
+// import { RoomService } from 'src/room/room.service';
+// import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway(1030, {
   cors: {
@@ -41,6 +41,12 @@ export class ChatGateway
 
   async handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected:${client.id}`);
+  }
+
+  @SubscribeMessage('test')
+  onTest(@MessageBody('test') test: string) {
+    console.log(test);
+    return test;
   }
 
   @SubscribeMessage('createRoom')
