@@ -36,4 +36,11 @@ export class AuthController {
   reAuth(@Req() req: Request, @Res() res: Response) {
     return this.authService.reAuth(req, res);
   }
+
+  @Post('authGoogl')
+  authGoogl(@Body('token') token: string, @Res() res: Response) {
+    console.log(15);
+
+    return this.authService.authGoogl(token, res);
+  }
 }

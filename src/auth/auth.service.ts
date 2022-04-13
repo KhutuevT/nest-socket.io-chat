@@ -21,102 +21,154 @@ export class AuthService {
     //avatar: string,
     res: Response,
   ) {
-    const candidate = await this.userModel.findOne({ email });
+    try {
+      const candidate = await this.userModel.findOne({ email });
 
-    if (candidate) {
-      throw new Error('User already exists error!');
+      if (candidate) {
+        throw new Error('User already exists error!');
+      }
+
+      //const nameFile: string = await this.saveAvatar(avatar);
+
+      const hashPassword: string = await hash(password, 3);
+
+      const user = await this.userModel.create({
+        email,
+        firstName,
+        lastName,
+        //avatar: `${nameFile}`,
+        password: hashPassword,
+      });
+
+      const { accessToken, refreshToken } = this.tokenService.generateTokens({
+        _id: user._id,
+        email,
+      });
+
+      await this.tokenService.saveToken(user._id, refreshToken);
+
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      res.send({
+        _id: `${user._id}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        status: user.status,
+        accessToken,
+      });
+    } catch (err) {
+      res.send({ message: err.message });
     }
-
-    //const nameFile: string = await this.saveAvatar(avatar);
-
-    const hashPassword: string = await hash(password, 3);
-
-    const user = await this.userModel.create({
-      email,
-      firstName,
-      lastName,
-      //avatar: `${nameFile}`,
-      password: hashPassword,
-    });
-
-    const { accessToken, refreshToken } = this.tokenService.generateTokens({
-      _id: user._id,
-      email,
-    });
-
-    this.tokenService.saveToken(user._id, refreshToken);
-
-    res.cookie('refreshToken', refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
-
-    return {
-      _id: `${user._id}`,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar,
-      status: user.status,
-      accessToken,
-    };
   }
 
   async authorization(email: string, password: string, res: Response) {
-    const user = await this.userModel.findOne({ email });
+    try {
+      const user = await this.userModel.findOne({ email });
 
-    if (!user) {
-      throw new Error('User not found error!');
+      if (!user) {
+        throw new Error('User not found error!');
+      }
+
+      if (user.status === 'delete') {
+        throw new Error('User deleted!');
+      }
+
+      const validPassword = compareSync(password, user.password);
+      if (!validPassword) {
+        throw new Error('User authorization error!');
+      }
+
+      const { accessToken, refreshToken } = this.tokenService.generateTokens({
+        _id: user._id,
+        email,
+      });
+
+      await this.tokenService.saveToken(user._id, refreshToken);
+
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      return {
+        _id: `${user._id}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        status: user.status,
+        accessToken,
+      };
+    } catch (err) {
+      res.send({ message: err.message });
     }
-
-    if (user.status === 'delete') {
-      throw new Error('User deleted!');
-    }
-
-    const validPassword = compareSync(password, user.password);
-    if (!validPassword) {
-      throw new Error('User authorization error!');
-    }
-
-    const { accessToken, refreshToken } = this.tokenService.generateTokens({
-      _id: user._id,
-      email,
-    });
-
-    this.tokenService.saveToken(user._id, refreshToken);
-    res.cookie('refreshToken', refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
-
-    return {
-      _id: `${user._id}`,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar,
-      status: user.status,
-      accessToken,
-    };
-    // return { typename: 'UserAuthorizationResultSuccess', user: returnUser };
   }
 
   async logout(userId: string, res: Response) {
-    const tokenDot = await this.tokenService.deleteToken(userId);
-    res.clearCookie('refreshToken');
-    return { typename: 'UserLogoutResultSuccess', message: `${tokenDot}` };
+    try {
+      await this.tokenService.deleteToken(userId);
+      res.clearCookie('refreshToken');
+      res.send({ message: 'Logout' });
+    } catch (err) {
+      res.send({ message: err.message });
+    }
   }
 
   async reAuth(req: Request, res: Response) {
-    const cookie = this.cookieInObject(req.headers.cookie);
-    const token = cookie.refreshToken;
+    try {
+      const cookie = this.cookieInObject(req.headers.cookie);
+      const token = cookie.refreshToken;
 
-    const { _id, accessToken, refreshToken } = this.tokenService.reAuth(token);
-    res.cookie('refreshToken', refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
-    await this.tokenService.saveToken(_id, refreshToken);
+      const { _id, accessToken, refreshToken } =
+        this.tokenService.reAuth(token);
 
-    return { accessToken };
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      await this.tokenService.saveToken(_id, refreshToken);
+
+      res.send({ accessToken });
+    } catch (err) {
+      res.send({ message: err.message });
+    }
+  }
+
+  async authGoogl(token: string, res: Response) {
+    try {
+      const check = await this.tokenService.existsToken(token);
+
+      if (!check) {
+        throw new Error('TokenNotExists');
+      }
+
+      const { _id, accessToken, refreshToken } =
+        this.tokenService.reAuth(token);
+
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      await this.tokenService.saveToken(_id, refreshToken);
+
+      const user = await this.userModel.findOne({ _id });
+
+      res.send({
+        _id: `${user._id}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        status: user.status,
+        accessToken,
+      });
+    } catch (err) {
+      res.send({ message: err.message });
+    }
   }
 
   private cookieInObject(cookie: string | undefined) {

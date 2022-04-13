@@ -3,6 +3,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { GoogleAuthService } from './google-auth.service';
 import { Request } from 'express';
 
+interface RequestNew extends Request {
+  user: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
+}
 @Controller('google-auth')
 export class GoogleAuthController {
   constructor(private readonly authService: GoogleAuthService) {}
@@ -15,7 +23,7 @@ export class GoogleAuthController {
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req: Request) {
-    return this.authService.googleLogin(req);
+  googleAuthRedirect(@Req() req: RequestNew /*, @Res() res: Response*/) {
+    return this.authService.googleLogin(req.user /*, res*/);
   }
 }

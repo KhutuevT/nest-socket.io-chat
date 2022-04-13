@@ -56,7 +56,11 @@ export class TokenService {
     try {
       const payload = verify(refreshToken, REFRESH_KEY) as CreateTokenDto;
 
-      const tokens = this.generateTokens(payload);
+      const tokens = this.generateTokens({
+        _id: payload._id,
+        email: payload.email,
+      });
+
       return {
         _id: payload._id,
         ...tokens,
@@ -66,14 +70,12 @@ export class TokenService {
     }
   };
 
-  existsToken = async (userId: string, token: string): Promise<boolean> => {
+  existsToken = async (token: string): Promise<boolean> => {
     try {
-      return this.tokenModel
-        .findOne({ userId, token })
-        .then((result: Token) => {
-          if (result) return true;
-          return false;
-        });
+      return this.tokenModel.findOne({ token }).then((result: Token) => {
+        if (result) return true;
+        return false;
+      });
     } catch (err) {
       throw new Error('TokenErrorExists');
     }

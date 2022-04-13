@@ -24,4 +24,4 @@ export class Message {
   createData: Date;
 }
 
-export const RoomSchema = SchemaFactory.createForClass(Message);
+export const MessageSchema = SchemaFactory.createForClass(Message);
