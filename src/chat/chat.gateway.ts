@@ -1,4 +1,4 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { Logger, OnModuleInit, Req, UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -10,6 +10,8 @@ import {
 } from '@nestjs/websockets';
 import { ClientRequest } from 'http';
 import { Socket, Server } from 'socket.io';
+import { Token } from 'src/common/decorators/token.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 // import { MessageService } from 'src/message/message.service';
 // import { RoomService } from 'src/room/room.service';
 // import { UserService } from 'src/user/user.service';
@@ -44,7 +46,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('test')
-  onTest(@MessageBody('test') test: string) {
+  onTest(@MessageBody() test: string) {
     console.log(test);
     return test;
   }
@@ -65,7 +67,8 @@ export class ChatGateway
   }
 
   @SubscribeMessage('addMessage')
-  onAddMessage(@MessageBody() data: string) {
+  @UseGuards(AuthGuard)
+  onAddMessage(@MessageBody() data: string, @Token() token: string) {
     this.server.emit('messageToClient', data);
     // return `addMessage: ${data}`;
   }
