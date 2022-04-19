@@ -67,7 +67,6 @@ export class ChatGateway
   }
 
   @SubscribeMessage('addMessage')
-  @UseGuards(AuthGuard)
   onAddMessage(@MessageBody() data: string, @Token() token: string) {
     this.server.emit('messageToClient', data);
     // return `addMessage: ${data}`;
