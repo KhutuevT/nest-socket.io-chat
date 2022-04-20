@@ -34,11 +34,6 @@ export class GoogleAuthService {
 
         await this.tokenService.saveToken(candidate._id, refreshToken);
 
-        // res.cookie('refreshToken', refreshToken, {
-        //   maxAge: 30 * 24 * 60 * 60 * 1000,
-        //   httpOnly: true,
-        // });
-
         return {
           refreshToken,
         };
@@ -54,11 +49,6 @@ export class GoogleAuthService {
       });
 
       await this.tokenService.saveToken(userNew._id, refreshToken);
-
-      // res.cookie('refreshToken', refreshToken, {
-      //   maxAge: 30 * 24 * 60 * 60 * 1000,
-      //   httpOnly: true,
-      // });
 
       return {
         refreshToken,
