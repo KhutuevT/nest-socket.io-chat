@@ -1,15 +1,10 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GoogleAuthService } from './google-auth.service';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 interface RequestNew extends Request {
-  user: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    avatar: string;
-  };
+  user: string;
 }
 @Controller('google-auth')
 export class GoogleAuthController {
@@ -23,7 +18,9 @@ export class GoogleAuthController {
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req: RequestNew) {
-    return this.authService.googleLogin(req.user);
+  googleAuthRedirect(@Req() req: RequestNew, @Res() res: Response) {
+    console.log('------', req.user);
+
+    res.send(req.user);
   }
 }
