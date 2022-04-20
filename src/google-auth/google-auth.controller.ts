@@ -12,15 +12,16 @@ export class GoogleAuthController {
 
   @Get()
   @UseGuards(AuthGuard('google'))
-  googleAuth(): void {
+  googleAuth(@Req() req: RequestNew, @Res() res: Response): void {
+    console.log('------', req.user);
+
+    res.send(req.user);
     // pass
   }
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req: RequestNew, @Res() res: Response) {
-    console.log('------', req.user);
-
     res.send(req.user);
   }
 }

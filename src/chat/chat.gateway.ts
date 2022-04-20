@@ -66,6 +66,7 @@ export class ChatGateway
     // return `leaveRoom: ${roomId}`;
   }
 
+  @UseGuards(AuthGuard)
   @SubscribeMessage('addMessage')
   onAddMessage(@MessageBody() data: string, @Token() token: string) {
     this.server.emit('messageToClient', data);

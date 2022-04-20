@@ -138,7 +138,7 @@ export class AuthService {
     }
   }
 
-  async authGoogl(token: string, res: Response) {
+  async authGoogle(token: string, res: Response) {
     try {
       const check = await this.tokenService.existsToken(token);
 

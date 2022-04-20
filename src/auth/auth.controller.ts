@@ -37,10 +37,10 @@ export class AuthController {
     return this.authService.reAuth(req, res);
   }
 
-  @Post('authGoogl')
-  authGoogl(@Body('token') token: string, @Res() res: Response) {
+  @Post('authGoogle')
+  authGoogle(@Body('token') token: string, @Res() res: Response) {
     console.log(15);
 
-    return this.authService.authGoogl(token, res);
+    return this.authService.authGoogle(token, res);
   }
 }
