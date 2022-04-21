@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TokenService } from 'src/token/token.service';
 import { User, UserDocument } from 'src/user/user.schema';
+import {  Response } from 'express';
 
 type TUser = {
   email: string;
@@ -18,41 +19,41 @@ export class GoogleAuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async googleLogin(user: TUser) {
+  async googleLogin(user: TUser, res: Response) {
     try {
       if (!user) {
         throw new Error('No user from google');
       }
 
-      const candidate = await this.userModel.findOne({ email: user.email });
+      let candidate = await this.userModel.findOne({ email: user.email });
 
-      if (candidate) {
-        const { refreshToken } = this.tokenService.generateTokens({
+      if (!candidate) {
+        candidate = await this.userModel.create({
+          ...user,
+        });
+      }
+
+        const { refreshToken, accessToken } = this.tokenService.generateTokens({
           _id: candidate._id,
           email: candidate.email,
         });
 
         await this.tokenService.saveToken(candidate._id, refreshToken);
 
-        return {
-          refreshToken,
-        };
-      }
+        res.cookie('refreshToken', refreshToken, {
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+        });
 
-      const userNew = await this.userModel.create({
-        ...user,
-      });
-
-      const { refreshToken } = this.tokenService.generateTokens({
-        _id: userNew._id,
-        email: userNew.email,
-      });
-
-      await this.tokenService.saveToken(userNew._id, refreshToken);
-
-      return {
-        refreshToken,
-      };
+        return res.send({
+          _id: `${candidate._id}`,
+          firstName: candidate.firstName,
+          lastName: candidate.lastName,
+          avatar: candidate.avatar,
+          status: candidate.status,
+          accessToken,
+        });
+        
     } catch (err) {
       return { message: 'ErrorGoogleLogin' };
     }
