@@ -55,7 +55,7 @@ export class GoogleAuthService {
         });
         
     } catch (err) {
-      return { message: 'ErrorGoogleLogin' };
+      return res.send({ message: 'ErrorGoogleLogin' });
     }
   }
 }

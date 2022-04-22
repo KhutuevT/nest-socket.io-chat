@@ -13,7 +13,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      callbackURL: 'http://localhost:3001',
+      callbackURL: 'http://localhost:3001/login',
       scope: ['email', 'profile'],
     });
   }
@@ -33,6 +33,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       avatar: photos[0].value,
     };
 
-    return done(null, user);
+    done(null, user);
   }
 }
