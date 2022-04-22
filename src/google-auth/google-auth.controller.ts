@@ -5,11 +5,11 @@ import { Request, Response } from 'express';
 
 interface RequestNew extends Request {
   user: {
-    email: string,
-      firstName: string,
-      lastName: string,
-      avatar: string,
-  }
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 }
 @Controller('google-auth')
 export class GoogleAuthController {
@@ -17,7 +17,9 @@ export class GoogleAuthController {
 
   @Get()
   @UseGuards(AuthGuard('google'))
-  googleAuth(): void { }
+  googleAuth(): void {
+    // pass
+  }
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
