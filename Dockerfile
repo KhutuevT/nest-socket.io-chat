@@ -12,6 +12,6 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE $PORT
 
 CMD ["node", "dist/main"]
