@@ -15,7 +15,7 @@ import { Token } from 'src/common/decorators/token.decorator';
 // import { RoomService } from 'src/room/room.service';
 // import { UserService } from 'src/user/user.service';
 
-@WebSocketGateway(1030, {
+@WebSocketGateway({
   cors: {
     origin: '*',
   },
@@ -67,6 +67,7 @@ export class ChatGateway
 
   @SubscribeMessage('addMessage')
   onAddMessage(@MessageBody() data: string, @Token() token: string) {
+    
     this.server.emit('messageToClient', data);
     // return `addMessage: ${data}`;
   }
