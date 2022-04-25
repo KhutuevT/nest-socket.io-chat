@@ -7,11 +7,11 @@ import { InjectModel } from '@nestjs/mongoose';
 export class RoomService {
   constructor(@InjectModel(Room.name) private roomModel: Model<RoomDocument>) {}
 
-  async create(ownerId: string, roomName: string, avatar: string) {
+  async create(ownerId: string, roomName: string, membersId: string[]) {
     const newRoom = new this.roomModel({
-      owner: ownerId,
+      ownerId: ownerId,
       name: roomName,
-      avatar,
+      membersId: membersId 
     });
 
     return newRoom.save();
