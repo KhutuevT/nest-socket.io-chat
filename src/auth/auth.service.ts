@@ -26,7 +26,7 @@ export class AuthService {
       const candidate = await this.userModel.findOne({ email });
 
       if (candidate) throw new Error('User already exists error!');
-      
+
       //const nameFile: string = await this.saveAvatar(avatar);
 
       const hashPassword: string = await hash(password, 3);
@@ -51,8 +51,9 @@ export class AuthService {
         httpOnly: true,
       });
 
-      res.send({
+      return res.send({
         _id: `${user._id}`,
+        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
@@ -60,7 +61,7 @@ export class AuthService {
         accessToken,
       });
     } catch (err) {
-      res.send({ message: err.message });
+      return res.send({ message: err.message });
     }
   }
 
@@ -87,16 +88,17 @@ export class AuthService {
         httpOnly: true,
       });
 
-      return {
+      return res.send({
         _id: `${user._id}`,
+        email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
         status: user.status,
         accessToken,
-      };
+      });
     } catch (err) {
-      res.send({ message: err.message });
+      return res.send({ message: err.message });
     }
   }
 
@@ -104,9 +106,9 @@ export class AuthService {
     try {
       await this.tokenService.deleteToken(userId);
       res.clearCookie('refreshToken');
-      res.send({ message: 'Logout' });
+      return res.send({ message: 'Logout' });
     } catch (err) {
-      res.send({ message: err.message });
+      return res.send({ message: err.message });
     }
   }
 
@@ -125,9 +127,9 @@ export class AuthService {
 
       await this.tokenService.saveToken(_id, refreshToken);
 
-      res.send({ accessToken });
+      return res.send({ accessToken });
     } catch (err) {
-      res.send({ message: err.message });
+      return res.send({ message: err.message });
     }
   }
 
@@ -137,7 +139,8 @@ export class AuthService {
 
       if (!check) throw new Error('TokenNotExists');
 
-      const { _id, accessToken, refreshToken } = this.tokenService.reAuth(token);
+      const { _id, accessToken, refreshToken } =
+        this.tokenService.reAuth(token);
 
       res.cookie('refreshToken', refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -148,7 +151,7 @@ export class AuthService {
 
       const user = await this.userModel.findOne({ _id });
 
-      res.send({
+      return res.send({
         _id: `${user._id}`,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -157,7 +160,7 @@ export class AuthService {
         accessToken,
       });
     } catch (err) {
-      res.send({ message: err.message });
+      return res.send({ message: err.message });
     }
   }
 
@@ -167,7 +170,9 @@ export class AuthService {
       .split(';')
       .map((item: string) => item.split('='))
       .reduce((acc: { [key: string]: string }, item: string[]) => {
-        acc[decodeURIComponent(item[0].trim())] = decodeURIComponent(item[1].trim());
+        acc[decodeURIComponent(item[0].trim())] = decodeURIComponent(
+          item[1].trim(),
+        );
         return acc;
       }, {});
   }

@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegAuthDto } from './dto/reg-auth.dto';
 import { AuthDto } from './dto/auth.dto';
+import { JWTGuard } from 'src/common/guards/auth.guard';
+import { Token } from 'src/common/decorators/token.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,11 +28,11 @@ export class AuthController {
     return this.authService.authorization(email, password, res);
   }
 
-  // TODO: add guards and decorator for token
-  // @Post('logout')
-  // logout() {
-  //   return this.authService.logout();
-  // }
+  @UseGuards(JWTGuard)
+  @Post('logout')
+  logout(@Token() token: string, @Res() res: Response) {
+    return this.authService.logout(token, res);
+  }
 
   @Post('reAuth')
   reAuth(@Req() req: Request, @Res() res: Response) {

@@ -5,7 +5,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 const ACCESS_KEY = process.env.JWT_ACCESS_KEY || '';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class JWTGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
