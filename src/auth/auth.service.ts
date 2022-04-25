@@ -13,6 +13,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
+  //TODO: add avatar
   async registration(
     email: string,
     password: string,
@@ -24,10 +25,8 @@ export class AuthService {
     try {
       const candidate = await this.userModel.findOne({ email });
 
-      if (candidate) {
-        throw new Error('User already exists error!');
-      }
-
+      if (candidate) throw new Error('User already exists error!');
+      
       //const nameFile: string = await this.saveAvatar(avatar);
 
       const hashPassword: string = await hash(password, 3);
@@ -69,18 +68,12 @@ export class AuthService {
     try {
       const user = await this.userModel.findOne({ email });
 
-      if (!user) {
-        throw new Error('User not found error!');
-      }
+      if (!user) throw new Error('User not found error!');
 
-      if (user.status === 'delete') {
-        throw new Error('User deleted!');
-      }
+      if (user.status === 'delete') throw new Error('User deleted!');
 
       const validPassword = compareSync(password, user.password);
-      if (!validPassword) {
-        throw new Error('User authorization error!');
-      }
+      if (!validPassword) throw new Error('User authorization error!');
 
       const { accessToken, refreshToken } = this.tokenService.generateTokens({
         _id: user._id,
@@ -142,12 +135,9 @@ export class AuthService {
     try {
       const check = await this.tokenService.existsToken(token);
 
-      if (!check) {
-        throw new Error('TokenNotExists');
-      }
+      if (!check) throw new Error('TokenNotExists');
 
-      const { _id, accessToken, refreshToken } =
-        this.tokenService.reAuth(token);
+      const { _id, accessToken, refreshToken } = this.tokenService.reAuth(token);
 
       res.cookie('refreshToken', refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -172,16 +162,12 @@ export class AuthService {
   }
 
   private cookieInObject(cookie: string | undefined) {
-    if (!cookie) {
-      return undefined;
-    }
+    if (!cookie) return undefined;
     return cookie
       .split(';')
       .map((item: string) => item.split('='))
       .reduce((acc: { [key: string]: string }, item: string[]) => {
-        acc[decodeURIComponent(item[0].trim())] = decodeURIComponent(
-          item[1].trim(),
-        );
+        acc[decodeURIComponent(item[0].trim())] = decodeURIComponent(item[1].trim());
         return acc;
       }, {});
   }
