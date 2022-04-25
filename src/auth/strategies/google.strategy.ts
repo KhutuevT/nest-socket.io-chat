@@ -3,7 +3,7 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { config } from 'dotenv';
 import { Injectable } from '@nestjs/common';
 
-import { GoogleAuthService } from './google-auth.service';
+import { GoogleAuthService } from '../services/google-auth.service';
 
 config();
 

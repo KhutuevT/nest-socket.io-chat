@@ -7,7 +7,6 @@ config();
 import { ChatModule } from './chat/chat.module';
 import { RoomModule } from './room/room.module';
 import { AppService } from './app.service';
-import { GoogleAuthModule } from './google-auth/google-auth.module';
 import { AppController } from './app.controller';
 import { MessageModule } from './message/message.module';
 import { TokenModule } from './token/token.module';
@@ -15,7 +14,6 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    GoogleAuthModule,
     ChatModule,
     RoomModule,
     MessageModule,

@@ -46,7 +46,6 @@ export class ChatGateway
 
   @SubscribeMessage('test')
   onTest(@MessageBody() test: string) {
-    console.log(test);
     return test;
   }
 
