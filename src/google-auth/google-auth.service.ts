@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TokenService } from 'src/token/token.service';
 import { User, UserDocument } from 'src/user/user.schema';
-import {  Response } from 'express';
+import { Response } from 'express';
 
 type TUser = {
   email: string;
@@ -21,9 +21,7 @@ export class GoogleAuthService {
 
   async googleLogin(user: TUser, res: Response) {
     try {
-      if (!user) {
-        throw new Error('No user from google');
-      }
+      if (!user) throw new Error('No user from google');
 
       let candidate = await this.userModel.findOne({ email: user.email });
 
@@ -33,27 +31,27 @@ export class GoogleAuthService {
         });
       }
 
-        const { refreshToken, accessToken } = this.tokenService.generateTokens({
-          _id: candidate._id,
-          email: candidate.email,
-        });
+      const { refreshToken, accessToken } = this.tokenService.generateTokens({
+        _id: candidate._id,
+        email: candidate.email,
+      });
 
-        await this.tokenService.saveToken(candidate._id, refreshToken);
+      await this.tokenService.saveToken(candidate._id, refreshToken);
 
-        res.cookie('refreshToken', refreshToken, {
-          maxAge: 30 * 24 * 60 * 60 * 1000,
-          httpOnly: true,
-        });
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
 
-        return res.send({
-          _id: `${candidate._id}`,
-          firstName: candidate.firstName,
-          lastName: candidate.lastName,
-          avatar: candidate.avatar,
-          status: candidate.status,
-          accessToken,
-        });
-        
+      return res.send({
+        _id: `${candidate._id}`,
+        email: candidate.email,
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        avatar: candidate.avatar,
+        status: candidate.status,
+        accessToken,
+      });
     } catch (err) {
       return res.send({ message: 'ErrorGoogleLogin' });
     }

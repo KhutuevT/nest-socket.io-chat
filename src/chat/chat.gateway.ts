@@ -11,7 +11,6 @@ import {
 import { ClientRequest } from 'http';
 import { Socket, Server } from 'socket.io';
 import { Token } from 'src/common/decorators/token.decorator';
-import { AuthGuard } from 'src/common/guards/auth.guard';
 // import { MessageService } from 'src/message/message.service';
 // import { RoomService } from 'src/room/room.service';
 // import { UserService } from 'src/user/user.service';
@@ -66,7 +65,6 @@ export class ChatGateway
     // return `leaveRoom: ${roomId}`;
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('addMessage')
   onAddMessage(@MessageBody() data: string, @Token() token: string) {
     this.server.emit('messageToClient', data);
