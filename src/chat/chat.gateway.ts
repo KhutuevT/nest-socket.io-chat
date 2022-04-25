@@ -68,8 +68,8 @@ export class ChatGateway
 
   @UseGuards(AuthGuard)
   @SubscribeMessage('addMessage')
-  onAddMessage(@MessageBody() data: string, @Token() token: string) {
-    this.server.emit('messageToClient', data);
+  onAddMessage(@MessageBody() data: {message: string, roomId: string}, @Token() token: string) {
+    this.server.to(data.roomId).emit('messageToClient', data.message);
     // return `addMessage: ${data}`;
   }
 }
