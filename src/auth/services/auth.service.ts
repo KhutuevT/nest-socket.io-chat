@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Model } from 'mongoose';
+import { Request, Response } from 'express';
+import { hash, compareSync } from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { TokenService } from 'src/token/token.service';
 import { User, UserDocument } from 'src/user/user.schema';
-import { Request, Response } from 'express';
-import { Model } from 'mongoose';
-import { hash, compareSync } from 'bcryptjs';
 
 @Injectable()
 export class AuthService {

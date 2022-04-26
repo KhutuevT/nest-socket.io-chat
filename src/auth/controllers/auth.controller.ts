@@ -1,12 +1,10 @@
-import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthService } from '../services/auth.service';
+import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+
 import { RegAuthDto } from '../dto/reg-auth.dto';
-import { AuthDto } from '../dto/auth.dto';
-import { JWTGuard } from 'src/common/guards/auth.guard';
-import { Token } from 'src/common/decorators/token.decorator';
-import { LocalAuthGuard } from '../authGuards/local-auth.guard';
+import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../authGuards/jwt-auth.guard';
+import { LocalAuthGuard } from '../authGuards/local-auth.guard';
 
 interface RequestNew extends Request {
   user: {

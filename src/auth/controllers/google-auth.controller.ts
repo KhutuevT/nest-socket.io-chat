@@ -1,8 +1,8 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { GoogleAuthService } from '../services/google-auth.service';
 import { Request, Response } from 'express';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+
 import { GoogleAuthGuard } from '../authGuards/google-auth.guard';
+import { GoogleAuthService } from '../services/google-auth.service';
 
 interface RequestNew extends Request {
   user: {
