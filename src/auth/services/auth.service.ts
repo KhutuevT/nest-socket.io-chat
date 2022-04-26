@@ -5,7 +5,6 @@ import { User, UserDocument } from 'src/user/user.schema';
 import { Request, Response } from 'express';
 import { Model } from 'mongoose';
 import { hash, compareSync } from 'bcryptjs';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -15,29 +14,30 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    const result = await this.userModel.findOne({email});
+    const result = await this.userModel.findOne({ email });
 
-    if (!result) throw new NotFoundException(`user with login: ${email} not found`);
+    if (!result)
+      throw new NotFoundException(`user with login: ${email} not found`);
 
     if (result.status === 'delete') throw new Error('User deleted!');
-    
+
     const hash = result.password;
 
-    const isMatch = await bcrypt.compare(password, hash);
+    const isMatch = await compareSync(password, hash);
 
     const user = {
-      _id:result.id,
+      _id: result.id,
       email: result.email,
       firstName: result.firstName,
       lastName: result.lastName,
       avatar: result.avatar,
-      status: result.status
-    }
-    
+      status: result.status,
+    };
+
     if (isMatch) return user;
 
     return null;
-}
+  }
 
   //TODO: add avatar
   async registration(
@@ -55,9 +55,9 @@ export class AuthService {
 
       //const nameFile: string = await this.saveAvatar(avatar);
 
-      const saltRound: number = 10;
+      const saltRound = 10;
 
-      const hashPassword: string = await bcrypt.hash(password, saltRound);
+      const hashPassword: string = await hash(password, saltRound);
 
       const user = await this.userModel.create({
         email,
@@ -93,11 +93,9 @@ export class AuthService {
     }
   }
 
-  async authorization(user: {[key: string]: string}, res: Response
-) {
+  async authorization(user: { [key: string]: string }, res: Response) {
     try {
-      
-      const {_id, email, firstName, lastName, avatar, status} = user;
+      const { _id, email, firstName, lastName, avatar, status } = user;
 
       const { accessToken, refreshToken } = this.tokenService.generateTokens({
         _id,
