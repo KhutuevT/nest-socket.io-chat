@@ -8,6 +8,7 @@ import { GoogleAuthController } from './constrollers/google-auth.controller';
 import { GoogleAuthService } from './services/google-auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController, GoogleAuthController],
-  providers: [AuthService, GoogleAuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, GoogleAuthService, LocalStrategy, JwtStrategy,GoogleStrategy],
 })
 export class AuthModule {}
