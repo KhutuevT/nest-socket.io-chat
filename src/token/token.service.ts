@@ -39,7 +39,7 @@ export class TokenService {
       const tokenNew = await this.tokenModel.create({ userId, token });
       return tokenNew;
     } catch (err) {
-      throw new Error('TokenErrorSave');
+      throw new Error(`TokenErrorSave: ${err}`);
     }
   };
 

@@ -2,14 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Room } from 'src/room/room.schema';
-import { User } from '../user/user.schema';
+// import { User } from 'src/user/user.schema';
 
 export type MessageDocument = Message & Document;
 
 @Schema()
 export class Message {
+  // TODO fix any
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  user: User;
+  user: any;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true })
   room: Room;

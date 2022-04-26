@@ -14,10 +14,10 @@ export class Room {
   avatar: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  owner: User;
+  ownerId: User;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-  users: User[];
+  membersId: User[];
 
   @Prop({ default: Date.now, required: true })
   createData: Date;
