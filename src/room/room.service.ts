@@ -11,7 +11,7 @@ export class RoomService {
     const newRoom = new this.roomModel({
       ownerId: ownerId,
       name: roomName,
-      membersId: membersId 
+      membersId: membersId,
     });
 
     return newRoom.save();

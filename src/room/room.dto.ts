@@ -1,5 +1,4 @@
 export class RoomDto {
-    name: string;
-    membersId: string[];
-  }
-  
+  name: string;
+  membersId: string[];
+}

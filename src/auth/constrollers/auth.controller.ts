@@ -33,10 +33,8 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req: any , @Res() res: Response) {
-
+  async login(@Req() req: any, @Res() res: Response) {
     const result = await this.authService.authorization(req.user, res);
-
   }
 
   @UseGuards(JwtAuthGuard)

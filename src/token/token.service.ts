@@ -29,7 +29,7 @@ export class TokenService {
   };
 
   saveToken = async (userId: string, token: string): Promise<Token> => {
-    try {      
+    try {
       const tokenExists = await this.tokenModel.findOne({ userId });
       if (tokenExists) {
         tokenExists.token = token;
