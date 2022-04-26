@@ -11,9 +11,12 @@ import {
 import { ClientRequest } from 'http';
 import { Socket, Server } from 'socket.io';
 import { Token } from 'src/common/decorators/token.decorator';
-// import { MessageService } from 'src/message/message.service';
+import { JWTGuard } from 'src/common/guards/auth.guard';
+import { MessageService } from 'src/message/message.service';
 // import { RoomService } from 'src/room/room.service';
 // import { UserService } from 'src/user/user.service';
+
+const users = {};
 
 @WebSocketGateway({
   cors: {
@@ -23,13 +26,12 @@ import { Token } from 'src/common/decorators/token.decorator';
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  // constructor(
-  //   private readonly messageService: MessageService,
-  //   private readonly roomService: RoomService,
-  //   private readonly userService: UserService,
-  // ) {}
+  constructor(
+    private readonly messageService: MessageService, // private readonly roomService: RoomService, // private readonly userService: UserService,
+  ) {}
+
   @WebSocketServer()
-  server: Server;
+  private io: Server;
   private logger: Logger = new Logger('ChatGateway');
 
   afterInit(server: Server) {
@@ -37,6 +39,12 @@ export class ChatGateway
   }
 
   async handleConnection(client: Socket) {
+    const { roomId, userId } = client.handshake.query;
+
+    console.log(roomId, userId);
+
+    client.join(roomId);
+
     this.logger.log(`Client connected:${client.id}`);
   }
 
@@ -55,8 +63,9 @@ export class ChatGateway
   }
 
   @SubscribeMessage('joinRoom')
-  onJoinRoom(@MessageBody() roomId: number) {
-    // return `joinRoom: ${roomId}`;
+  async onJoinRoom(@MessageBody() data: any) {
+    const messages = await this.messageService.getAllRoomMessage(data.roomId);
+    this.io.to(data.roomId).emit('allRoomMessages', messages);
   }
 
   @SubscribeMessage('leaveRoom')
@@ -64,9 +73,10 @@ export class ChatGateway
     // return `leaveRoom: ${roomId}`;
   }
 
+  @UseGuards(JWTGuard)
   @SubscribeMessage('addMessage')
-  onAddMessage(@MessageBody() data: string, @Token() token: string) {
-    this.server.emit('messageToClient', data);
-    // return `addMessage: ${data}`;
+  async onAddMessage(@MessageBody() data: any, @Token() id: string) {
+    const message = await this.messageService.add(id, data.roomId, data.text);
+    this.io.to(data.roomId).emit('messageToClient', message);
   }
 }
