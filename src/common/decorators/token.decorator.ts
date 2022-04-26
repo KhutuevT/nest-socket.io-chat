@@ -8,7 +8,7 @@ export const Token = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest();
     const token = req.handshake.headers.authorization.split('Bearer ')[1];
-    const user = verify(token, ACCESS_KEY) as { id: string; email: string };
-    return user.id;
+    const user = verify(token, ACCESS_KEY) as { _id: string; email: string };
+    return user._id;
   },
 );

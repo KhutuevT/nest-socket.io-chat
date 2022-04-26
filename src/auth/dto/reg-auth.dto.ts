@@ -1,8 +1,7 @@
-import { IsEmail, Length } from 'class-validator'
+import { IsEmail, Length } from 'class-validator';
 
 export class RegAuthDto {
-
-  @IsEmail()  
+  @IsEmail()
   email: string;
   @Length(3)
   firstName: string;
