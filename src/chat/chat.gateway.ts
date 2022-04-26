@@ -66,7 +66,6 @@ export class ChatGateway
 
   @SubscribeMessage('addMessage')
   onAddMessage(@MessageBody() data: string, @Token() token: string) {
-    
     this.server.emit('messageToClient', data);
     // return `addMessage: ${data}`;
   }
