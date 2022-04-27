@@ -1,4 +1,3 @@
-import { Logger, OnModuleInit, Req, UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -8,13 +7,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { ClientRequest } from 'http';
 import { Socket, Server } from 'socket.io';
-import { Token } from 'src/common/decorators/token.decorator';
+import { Logger, UseGuards } from '@nestjs/common';
+
 import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
-// import { RoomService } from 'src/room/room.service';
-// import { UserService } from 'src/user/user.service';
+import { Token } from 'src/common/decorators/token.decorator';
 
 const users = {};
 

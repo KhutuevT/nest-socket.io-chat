@@ -1,9 +1,10 @@
+import { Model } from 'mongoose';
+import { Response } from 'express';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+
 import { TokenService } from 'src/token/token.service';
 import { User, UserDocument } from 'src/user/user.schema';
-import { Response } from 'express';
 
 type TUser = {
   email: string;
