@@ -10,4 +10,9 @@ export class AppController {
   auth(): string {
     return this.appService.auth();
   }
+
+  @Get('/environment')
+  environment(): string {
+    return `ENVIRONMENT: ${process.env.ENVIRONMENT}`;
+  }
 }
