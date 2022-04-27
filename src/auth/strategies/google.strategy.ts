@@ -10,10 +10,12 @@ import { GoogleAuthService } from '../services/google-auth.service';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly authService: GoogleAuthService) {
+    let callbackURL = process.env.DEV_GOOGLE_CALLBACK_URL;
+    if (process.env.ENVIRONMENT === 'PROD') callbackURL = process.env.PROD_GOOGLE_CALLBACK_URL;
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      callbackURL: 'http://localhost:3001/login',
+      callbackURL: callbackURL,
       scope: ['email', 'profile'],
     });
   }
