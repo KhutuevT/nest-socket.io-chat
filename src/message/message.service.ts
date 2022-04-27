@@ -1,8 +1,9 @@
+import { Model } from 'mongoose';
+import { Response } from 'express';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+
 import { Message, MessageDocument } from './schemas/message.schema';
-import { Response } from 'express';
 
 @Injectable()
 export class MessageService {

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
+
 import { RoomDto } from './room.dto';
 import { RoomService } from './room.service';
 

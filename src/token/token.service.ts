@@ -1,9 +1,10 @@
+import { Model } from 'mongoose';
 import { sign, verify } from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateTokenDto, ResultTokens } from './dto/common.token.dto';
+
 import { Token, TokenDocument } from './schemas/token.schema';
+import { CreateTokenDto, ResultTokens } from './dto/common.token.dto';
 
 const ACCESS_KEY = process.env.JWT_ACCESS_KEY;
 const REFRESH_KEY = process.env.JWT_REFRESH_KEY;
