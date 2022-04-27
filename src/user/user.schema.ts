@@ -8,8 +8,8 @@ export class User {
   @Prop({ required: true, default: 'Anonymous', unique: true })
   email: string;
 
-  @Prop({ default: 'Anonymous' })
-  password?: string;
+  @Prop({ required: false })
+  password: string;
 
   @Prop({ required: true, default: 'Anonymous' })
   firstName: string;

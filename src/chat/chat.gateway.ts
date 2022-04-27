@@ -72,7 +72,12 @@ export class ChatGateway
   @UseGuards(JWTGuard)
   @SubscribeMessage('addMessage')
   async onAddMessage(@MessageBody() data: any, @Token() id: string) {
-    const message = await this.messageService.add(id, data.roomId, data.text);
+    const message = await this.messageService.add(
+      id,
+      data.roomId,
+      data.text,
+      data.tag,
+    );
     this.io.to(data.roomId).emit('messageToClient', message);
   }
 }
