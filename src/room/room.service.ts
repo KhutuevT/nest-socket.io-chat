@@ -107,6 +107,8 @@ export class RoomService {
 
       if (!roomName) throw new Error('No name');
 
+      room.name = roomName;
+
       await room.save();
 
       return room;
