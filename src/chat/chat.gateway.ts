@@ -77,6 +77,7 @@ export class ChatGateway
       data.roomId,
       data.text,
       data.tags,
+      data.voice
     );
     this.io.to(data.roomId).emit('messageToClient', message);
   }
