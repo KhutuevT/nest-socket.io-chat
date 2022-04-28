@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
   Delete,
+  Get,
   Patch,
   Post,
   Req,
@@ -46,5 +48,17 @@ export class RoomController {
   async leaveRoom(@Res() res: Response) {
     const user = '6267fd0aaa12046c135ecb83';
     return res.send(await this.roomService.leaveRoom(ownerId, roomId));
+  }
+
+  @Patch('/changeName')
+  async changeName(@Res() res: Response) {
+    return res.send(
+      await this.roomService.changeName(ownerId, roomId, 'ABOBA228'),
+    );
+  }
+
+  @Get('/getRoomsUser')
+  async getRoomsUser(@Res() res: Response) {
+    return res.send(await this.roomService.getRoomsUser(ownerId));
   }
 }

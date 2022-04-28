@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -98,14 +99,32 @@ export class RoomService {
   }
 
   async changeName(ownerId: string, roomId: string, roomName: string) {
-    return await this.roomModel.updateOne(
-      { _id: roomId, owner: ownerId },
-      { name: roomName },
-    );
+    try {
+      const room = await this.roomModel.findOne({
+        _id: roomId,
+        owner: ownerId,
+      });
+
+      if (!roomName) throw new Error('No name');
+
+      room.name = roomName;
+
+      await room.save();
+
+      return room;
+    } catch (error: unknown) {
+      throw new Error(`Change name room error! Error: ${error}`);
+    }
   }
 
-  async getAllRoom(roomId: string) {
-    return await this.roomModel.find({ _id: roomId });
+  async getRoomsUser(userId: string) {
+    try {
+      return await this.roomModel.find().then((result) => {
+        return result.filter((room) => room.membersId.includes(userId));
+      });
+    } catch (error: unknown) {
+      throw new Error(`Find room error! Error: ${error}`);
+    }
   }
   // TODO: in planning
   // async changeAvatar(ownerId: string, roomId: string, avatar: string) {
