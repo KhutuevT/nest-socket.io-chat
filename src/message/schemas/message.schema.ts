@@ -2,10 +2,14 @@ import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Room } from 'src/room/room.schema';
+import { Room } from 'src/room/schema/room.schema';
 
 export type MessageDocument = Message & Document;
 
+export type Tag = {
+  nameUser: string;
+  email: string;
+};
 @Schema()
 export class Message {
   // TODO fix any
@@ -17,6 +21,9 @@ export class Message {
 
   @Prop({ required: true })
   text: string;
+
+  @Prop({ required: false })
+  tags?: Tag[];
 
   @Prop({ default: false })
   isChanged: boolean;
