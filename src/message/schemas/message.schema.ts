@@ -23,6 +23,9 @@ export class Message {
   text: string;
 
   @Prop({ required: false })
+  voice: string;
+
+  @Prop({ required: false })
   tags?: Tag[];
 
   @Prop({ default: false })
