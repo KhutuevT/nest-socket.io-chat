@@ -17,7 +17,7 @@ export class User {
   @Prop({ required: true, default: 'Anonymous' })
   lastName: string;
 
-  @Prop({ required: true, default: 'default.png' })
+  @Prop({ required: true, default: 'defaultAvatar.png' })
   avatar: string;
 
   @Prop({ default: Date.now, required: true })
