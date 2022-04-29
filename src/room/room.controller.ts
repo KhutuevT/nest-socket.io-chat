@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -15,7 +14,7 @@ import { RoomDto } from './room.dto';
 import { RoomService } from './room.service';
 
 const ownerId = '6267fd30aa12046c135ecb9b';
-const roomId = '62693c63eb578e75bda76d76';
+const roomId = '626b9b1f34641a59dfd6b1e3';
 
 @Controller('room')
 export class RoomController {
@@ -54,6 +53,17 @@ export class RoomController {
   async changeName(@Res() res: Response) {
     return res.send(
       await this.roomService.changeName(ownerId, roomId, 'ABOBA228'),
+    );
+  }
+
+  @Patch('/changeAvatar')
+  async changeAvatar(@Res() res: Response) {
+    return res.send(
+      await this.roomService.changeAvatar(
+        ownerId,
+        roomId,
+        'https://www.iguides.ru/upload/medialibrary/9f8/9f8fdff471b7d281f81f694c100b5adc.png',
+      ),
     );
   }
 

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -52,6 +51,8 @@ export class RoomService {
         owner: ownerId,
       });
 
+      if (!room) throw new Error('No room');
+
       let check = false;
       const newUsers = [];
 
@@ -80,6 +81,8 @@ export class RoomService {
         owner: ownerId,
       });
 
+      if (!room) throw new Error('No room');
+
       return await this.commonDelete(room, userId);
     } catch (error: unknown) {
       throw new Error(`Delete users in room error! Error: ${error}`);
@@ -91,6 +94,9 @@ export class RoomService {
       const room = await this.roomModel.findOne({
         _id: roomId,
       });
+
+      if (!room) throw new Error('No room');
+
       if (room.ownerId.toString() === userId) return 'You are owner';
       return await this.commonDelete(room, userId);
     } catch (error: unknown) {
@@ -104,6 +110,8 @@ export class RoomService {
         _id: roomId,
         owner: ownerId,
       });
+
+      if (!room) throw new Error('No room');
 
       if (!roomName) throw new Error('No name');
 
@@ -126,13 +134,27 @@ export class RoomService {
       throw new Error(`Find room error! Error: ${error}`);
     }
   }
-  // TODO: in planning
-  // async changeAvatar(ownerId: string, roomId: string, avatar: string) {
-  //   return await this.roomModel.updateOne(
-  //     { _id: roomId, owner: ownerId },
-  //     { avatar },
-  //   );
-  // }
+
+  async changeAvatar(ownerId: string, roomId: string, avatar: string) {
+    try {
+      const room = await this.roomModel.findOne({
+        _id: roomId,
+        owner: ownerId,
+      });
+
+      if (!room) throw new Error('No room');
+
+      if (!avatar) throw new Error('No avatar');
+
+      room.avatar = avatar;
+
+      await room.save();
+
+      return room;
+    } catch (error: unknown) {
+      throw new Error(`Change avatar room error! Error: ${error}`);
+    }
+  }
 
   private async commonDelete(room: RoomDocument, userId: string) {
     let check = false;
