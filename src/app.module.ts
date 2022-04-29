@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { TokenModule } from './token/token.module';
 import { MessageModule } from './message/message.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MessageModule } from './message/message.module';
     MongooseModule.forRoot(process.env.MONGODB_URL),
     TokenModule,
     AuthModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
