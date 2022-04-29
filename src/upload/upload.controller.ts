@@ -1,11 +1,13 @@
-import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
+import { JwtAuthGuard } from 'src/auth/authGuards/jwt-auth.guard';
 
 @Controller('upload')
 export class UploadController {
 
+  @UseGuards(JwtAuthGuard)
   @Post('voice')
   @UseInterceptors(FileInterceptor('file',{
     storage: diskStorage({
@@ -31,6 +33,7 @@ export class UploadController {
     return file.filename;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('image')
   @UseInterceptors(FileInterceptor('file',{
     storage: diskStorage({
