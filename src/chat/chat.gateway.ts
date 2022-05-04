@@ -7,15 +7,17 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { createClient } from 'redis';
 import { Socket, Server } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 
 import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
 import { Token } from 'src/common/decorators/token.decorator';
-
 const onlineUsers = {};
-
+const redis = createClient();
+redis.on('error', (err) => console.log('Redis Client Error', err));
+redis.connect();
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -36,22 +38,24 @@ export class ChatGateway
     this.logger.log(`Initialized!`);
   }
 
-  @UseGuards(JWTGuard)
-  async handleConnection(client: Socket, @Token() id: string) {
+  async handleConnection(client: Socket) {
     const { roomId, userId } = client.handshake.query;
 
     client.join(roomId);
-
     this.logger.log(`Client connected:${client.id}`);
-    onlineUsers[client.id] = id;
-    console.log(`data: ${Object.keys(client.data)}`);
-    //console.log(`Online: ${Object.values(onlineUsers)}`);
+
+    await redis.set(userId.toString(),client.id);
+    const onlineUsers = await redis.keys('*');
+    this.io.emit('online', onlineUsers);
   }
 
   async handleDisconnect(client: Socket) {
+    const { userId } = client.handshake.query;
     this.logger.log(`Client disconnected:${client.id}`);
-    delete onlineUsers[client.id];
-    console.log(`Online: ${Object.values(onlineUsers)}`);
+
+    redis.del(userId.toString());
+    const onlineUsers = await redis.keys('*');
+    this.io.emit('online', onlineUsers);
   }
 
   @SubscribeMessage('test')
