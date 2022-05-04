@@ -12,10 +12,12 @@ import { Logger, UseGuards } from '@nestjs/common';
 
 import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
-import { Token } from 'src/common/decorators/token.decorator';
+import { UserIdInToken } from 'src/common/decorators/userId.decorator';
+import { RoomService } from 'src/room/room.service';
 
 const users = {};
 
+@UseGuards(JWTGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -25,7 +27,8 @@ export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
-    private readonly messageService: MessageService, // private readonly roomService: RoomService, // private readonly userService: UserService,
+    private readonly messageService: MessageService,
+    private readonly roomService: RoomService, // private readonly userService: UserService,
   ) {}
 
   @WebSocketServer()
@@ -37,9 +40,13 @@ export class ChatGateway
   }
 
   async handleConnection(client: Socket) {
-    const { roomId, userId } = client.handshake.query;
+    const { userId } = client.handshake.query as { [key: string]: string };
 
-    client.join(roomId);
+    const rooms = await this.roomService.getRoomsUser(userId);
+
+    client.join(userId);
+
+    rooms.forEach((room) => client.join(room._id.toString()));
 
     this.logger.log(`Client connected:${client.id}`);
   }
@@ -58,10 +65,10 @@ export class ChatGateway
     // return `createRoom: ${roomId}`;
   }
 
-  @SubscribeMessage('joinRoom')
-  async onJoinRoom(@MessageBody() data: any) {
+  @SubscribeMessage('openRoom')
+  async onOpenRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
     const messages = await this.messageService.getAllRoomMessage(data.roomId);
-    this.io.to(data.roomId).emit('allRoomMessages', messages);
+    this.io.to(id).emit('allRoomMessages', messages);
   }
 
   @SubscribeMessage('leaveRoom')
@@ -69,15 +76,14 @@ export class ChatGateway
     // return `leaveRoom: ${roomId}`;
   }
 
-  @UseGuards(JWTGuard)
   @SubscribeMessage('addMessage')
-  async onAddMessage(@MessageBody() data: any, @Token() id: string) {
+  async onAddMessage(@MessageBody() data: any, @UserIdInToken() id: string) {
     const message = await this.messageService.add(
       id,
       data.roomId,
       data.text,
       data.tags,
-      data.voice
+      data.voice,
     );
     this.io.to(data.roomId).emit('messageToClient', message);
   }
