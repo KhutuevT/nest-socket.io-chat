@@ -48,6 +48,8 @@ export class ChatGateway
 
     rooms.forEach((room) => client.join(room._id.toString()));
 
+    this.io.to(userId).emit('getAllRooms', rooms);
+
     this.logger.log(`Client connected:${client.id}`);
   }
 
@@ -55,13 +57,10 @@ export class ChatGateway
     this.logger.log(`Client disconnected:${client.id}`);
   }
 
-  @SubscribeMessage('test')
-  onTest(@MessageBody() test: string) {
-    return test;
-  }
-
   @SubscribeMessage('createRoom')
-  onCreateRoom(@MessageBody() roomId: number) {
+  async onCreateRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
+    const room = await this.roomService.create(id, data.name, data.users);
+
     // return `createRoom: ${roomId}`;
   }
 
