@@ -7,8 +7,8 @@ import { Room } from 'src/room/schema/room.schema';
 export type MessageDocument = Message & Document;
 
 export type Tag = {
-  displayName: string;
-  email: string;
+  displayName?: string;
+  email?: string;
   role?: string;
 };
 @Schema()
