@@ -3,6 +3,7 @@
 /node_modules
 /.vscode
 /uploads
+dump.rdb
 
 # Logs
 .env

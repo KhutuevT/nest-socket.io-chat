@@ -8,16 +8,34 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { createClient } from 'redis';
+import { verify } from 'jsonwebtoken';
 import { Socket, Server } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 
 import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
 import { Token } from 'src/common/decorators/token.decorator';
-const onlineUsers = {};
+
+
 const redis = createClient();
 redis.on('error', (err) => console.log('Redis Client Error', err));
 redis.connect();
+
+const ACCESS_KEY = process.env.JWT_ACCESS_KEY || '';
+
+const getIdFromToken = (req) =>{
+const authHeader = req.handshake.headers.authorization;
+    if (!authHeader) throw new Error('Not Header Auth');
+
+    const token = authHeader.split('Bearer ')[1];
+    if (!token) throw new Error('Incorrect Token');
+
+    try {
+      return verify(token, ACCESS_KEY)._id;
+    } catch (err) {
+      throw new Error('Invalid Token');
+    }
+  }
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -39,23 +57,34 @@ export class ChatGateway
   }
 
   async handleConnection(client: Socket) {
+    try{
     const { roomId, userId } = client.handshake.query;
-
+    const id = getIdFromToken(client);
+    console.log(`id: ${id}`);
     client.join(roomId);
     this.logger.log(`Client connected:${client.id}`);
 
-    await redis.set(userId.toString(),client.id);
+    await redis.set(id,client.id);
     const onlineUsers = await redis.keys('*');
     this.io.emit('online', onlineUsers);
+    this.io.emit('onlineAdd');
+    }
+    catch(err) {
+      this.logger.log(`error: ${err}`)
+    }
   }
 
   async handleDisconnect(client: Socket) {
-    const { userId } = client.handshake.query;
+    try{
     this.logger.log(`Client disconnected:${client.id}`);
-
-    redis.del(userId.toString());
+    const id = getIdFromToken(client);
+    redis.del(id);
     const onlineUsers = await redis.keys('*');
     this.io.emit('online', onlineUsers);
+    }
+    catch(err) {
+      this.logger.log(`error: ${err}`)
+    }
   }
 
   @SubscribeMessage('test')

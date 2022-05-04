@@ -9,6 +9,7 @@ export class JWTGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    console.log(context);
     const req = context.switchToHttp().getRequest();
     const authHeader = req.handshake.headers.authorization;
     if (!authHeader) throw new Error('Not Header Auth');
