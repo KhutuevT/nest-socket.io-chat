@@ -7,15 +7,17 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { createClient } from 'redis';
 import { Socket, Server } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 
 import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
 import { Token } from 'src/common/decorators/token.decorator';
-
-const users = {};
-
+const onlineUsers = {};
+const redis = createClient();
+redis.on('error', (err) => console.log('Redis Client Error', err));
+redis.connect();
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -40,12 +42,20 @@ export class ChatGateway
     const { roomId, userId } = client.handshake.query;
 
     client.join(roomId);
-
     this.logger.log(`Client connected:${client.id}`);
+
+    await redis.set(userId.toString(),client.id);
+    const onlineUsers = await redis.keys('*');
+    this.io.emit('online', onlineUsers);
   }
 
   async handleDisconnect(client: Socket) {
+    const { userId } = client.handshake.query;
     this.logger.log(`Client disconnected:${client.id}`);
+
+    redis.del(userId.toString());
+    const onlineUsers = await redis.keys('*');
+    this.io.emit('online', onlineUsers);
   }
 
   @SubscribeMessage('test')
@@ -72,6 +82,7 @@ export class ChatGateway
   @UseGuards(JWTGuard)
   @SubscribeMessage('addMessage')
   async onAddMessage(@MessageBody() data: any, @Token() id: string) {
+    console.log(`id: ${id}`);
     const message = await this.messageService.add(
       id,
       data.roomId,
