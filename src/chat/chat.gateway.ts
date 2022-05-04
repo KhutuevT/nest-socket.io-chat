@@ -14,7 +14,7 @@ import { JWTGuard } from 'src/common/guards/auth.guard';
 import { MessageService } from 'src/message/message.service';
 import { Token } from 'src/common/decorators/token.decorator';
 
-const users = {};
+const onlineUsers = {};
 
 @WebSocketGateway({
   cors: {
@@ -36,16 +36,22 @@ export class ChatGateway
     this.logger.log(`Initialized!`);
   }
 
-  async handleConnection(client: Socket) {
+  @UseGuards(JWTGuard)
+  async handleConnection(client: Socket, @Token() id: string) {
     const { roomId, userId } = client.handshake.query;
 
     client.join(roomId);
 
     this.logger.log(`Client connected:${client.id}`);
+    onlineUsers[client.id] = id;
+    console.log(`data: ${Object.keys(client.data)}`);
+    //console.log(`Online: ${Object.values(onlineUsers)}`);
   }
 
   async handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected:${client.id}`);
+    delete onlineUsers[client.id];
+    console.log(`Online: ${Object.values(onlineUsers)}`);
   }
 
   @SubscribeMessage('test')
@@ -72,6 +78,7 @@ export class ChatGateway
   @UseGuards(JWTGuard)
   @SubscribeMessage('addMessage')
   async onAddMessage(@MessageBody() data: any, @Token() id: string) {
+    console.log(`id: ${id}`);
     const message = await this.messageService.add(
       id,
       data.roomId,
