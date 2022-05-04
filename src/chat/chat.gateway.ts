@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -58,10 +59,43 @@ export class ChatGateway
   }
 
   @SubscribeMessage('createRoom')
-  async onCreateRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
+  async onCreateRoom(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: Socket,
+    @UserIdInToken() id: string,
+  ) {
     const room = await this.roomService.create(id, data.name, data.users);
 
-    // return `createRoom: ${roomId}`;
+    client.join(room._id.toString());
+
+    room.membersId.forEach((members) =>
+      this.io.to(members.toString()).emit('inviteRoom', room),
+    );
+  }
+
+  @SubscribeMessage('acceptInvite')
+  async onAcceptInvite(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: Socket,
+    @UserIdInToken() id: string,
+  ) {
+    const { roomId } = data;
+
+    const room = await this.roomService.getRoomById(roomId);
+
+    client.join(roomId);
+
+    this.io.to(id).emit('infoRoom', room);
+  }
+
+  @SubscribeMessage('rejectInvite')
+  async onRejectInvite(@MessageBody() data: any, @UserIdInToken() id: string) {
+    const { roomId } = data;
+
+    await this.roomService.leaveRoom(id, roomId);
+    const room = await this.roomService.getRoomById(roomId);
+
+    this.io.to(roomId).emit('infoRoom', room);
   }
 
   @SubscribeMessage('openRoom')

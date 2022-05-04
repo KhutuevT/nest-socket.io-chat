@@ -22,7 +22,13 @@ export class RoomService {
         membersId: membersId,
       });
 
-      return newRoom;
+      const room = await newRoom.populate('ownerId');
+
+      const { password, ...userInfo } = room.ownerId.toObject();
+
+      room.ownerId = userInfo;
+
+      return room;
     } catch (error: unknown) {
       throw new Error(`Create room error! Error: ${error}`);
     }
@@ -130,6 +136,24 @@ export class RoomService {
       return await this.roomModel.find().then((result) => {
         return result.filter((room) => room.membersId.includes(userId));
       });
+    } catch (error: unknown) {
+      throw new Error(`Find room error! Error: ${error}`);
+    }
+  }
+
+  async getRoomById(roomId: string) {
+    try {
+      const roomById = await this.roomModel.findOne({ _id: roomId });
+
+      const room = await roomById.populate('ownerId');
+
+      const { password, ...userInfo } = room.ownerId.toObject();
+
+      room.ownerId = userInfo;
+
+      return room;
+
+      return;
     } catch (error: unknown) {
       throw new Error(`Find room error! Error: ${error}`);
     }

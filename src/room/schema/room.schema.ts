@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { User } from 'src/user/user.schema';
 
 export type RoomDocument = Room & Document;
 
+//TODO: fix any
 @Schema()
 export class Room {
   @Prop({ required: true, default: 'defaultRoomName' })
@@ -13,7 +15,7 @@ export class Room {
   avatar: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  ownerId: string;
+  ownerId: string | User | any;
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', sparse: true }],
