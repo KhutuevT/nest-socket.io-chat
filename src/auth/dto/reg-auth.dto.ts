@@ -1,4 +1,4 @@
-import { IsEmail, Length } from 'class-validator';
+import { IsEmail, IsOptional, Length } from 'class-validator';
 
 export class RegAuthDto {
   @IsEmail()
@@ -9,5 +9,7 @@ export class RegAuthDto {
   lastName: string;
   @Length(6)
   password: string;
-  //avatar: string,
+  @IsOptional()
+  @Length(1)
+  avatar: string;
 }

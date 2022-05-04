@@ -12,6 +12,7 @@ import { AppController } from './app.controller';
 import { TokenModule } from './token/token.module';
 import { MessageModule } from './message/message.module';
 import { UploadModule } from './upload/upload.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UploadModule } from './upload/upload.module';
     TokenModule,
     AuthModule,
     UploadModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
