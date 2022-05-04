@@ -25,17 +25,17 @@ const ACCESS_KEY = process.env.JWT_ACCESS_KEY || '';
 
 const getIdFromToken = (req) =>{
 const authHeader = req.handshake.headers.authorization;
-    if (!authHeader) throw new Error('Not Header Auth');
+  if (!authHeader) throw new Error('Not Header Auth');
 
-    const token = authHeader.split('Bearer ')[1];
-    if (!token) throw new Error('Incorrect Token');
+  const token = authHeader.split('Bearer ')[1];
+  if (!token) throw new Error('Incorrect Token');
 
-    try {
-      return verify(token, ACCESS_KEY)._id;
-    } catch (err) {
-      throw new Error('Invalid Token');
-    }
+  try {
+    return verify(token, ACCESS_KEY)._id;
+  } catch (err) {
+    throw new Error('Invalid Token');
   }
+}
 @WebSocketGateway({
   cors: {
     origin: '*',
