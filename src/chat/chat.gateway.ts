@@ -58,9 +58,8 @@ export class ChatGateway
 
   async handleConnection(client: Socket) {
     try{
-    const { roomId, userId } = client.handshake.query;
+    const { roomId} = client.handshake.query;
     const id = getIdFromToken(client);
-    console.log(`id: ${id}`);
     client.join(roomId);
     this.logger.log(`Client connected:${client.id}`);
 
