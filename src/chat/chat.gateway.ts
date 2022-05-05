@@ -8,6 +8,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { createClient } from 'redis';
+import { verify } from 'jsonwebtoken';
 import { Socket, Server } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 
@@ -27,7 +29,25 @@ import {
   RoomIdDto,
 } from './dto/data.dto';
 
-const users = {};
+const redis = createClient();
+redis.on('error', (err) => console.log('Redis Client Error', err));
+redis.connect();
+
+const ACCESS_KEY = process.env.JWT_ACCESS_KEY || '';
+
+const getIdFromToken = (req) => {
+  const authHeader = req.handshake.headers.authorization;
+  if (!authHeader) throw new Error('Not Header Auth');
+
+  const token = authHeader.split('Bearer ')[1];
+  if (!token) throw new Error('Incorrect Token');
+
+  try {
+    return verify(token, ACCESS_KEY)._id;
+  } catch (err) {
+    throw new Error('Invalid Token');
+  }
+};
 
 @UseGuards(JWTGuard)
 @WebSocketGateway({
@@ -52,20 +72,33 @@ export class ChatGateway
   }
 
   async handleConnection(client: Socket) {
-    const { userId } = client.handshake.query as { [key: string]: string };
+    try {
+      const id = getIdFromToken(client);
+      const rooms = await this.roomService.getRoomsUser(id);
 
-    const rooms = await this.roomService.getRoomsUser(userId);
+      client.join(id);
+      rooms.forEach((room) => client.join(room._id.toString()));
 
-    client.join(userId);
-    rooms.forEach((room) => client.join(room._id.toString()));
-
-    this.io.to(userId).emit('getAllRooms', rooms);
-
-    this.logger.log(`Client connected:${client.id}`);
+      await redis.set(id, client.id);
+      const onlineUsers = await redis.keys('*');
+      this.io.emit('online', onlineUsers);
+      this.io.emit('onlineAdd');
+      this.logger.log(`Client connected:${client.id}`);
+    } catch (err) {
+      this.logger.log(`error: ${err}`);
+    }
   }
 
   async handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected:${client.id}`);
+    try {
+      this.logger.log(`Client disconnected:${client.id}`);
+      const id = getIdFromToken(client);
+      redis.del(id);
+      const onlineUsers = await redis.keys('*');
+      this.io.emit('online', onlineUsers);
+    } catch (err) {
+      this.logger.log(`error: ${err}`);
+    }
   }
 
   @SubscribeMessage('createRoom')
