@@ -74,6 +74,23 @@ export class ChatGateway
     );
   }
 
+  @SubscribeMessage('deleteRoom')
+  async onDeleteRoom(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: Socket,
+    @UserIdInToken() id: string,
+  ) {
+    const { roomId } = data;
+    const room = await this.roomService.getRoomById(roomId);
+    await this.roomService.delete(id, roomId);
+
+    room.membersId.forEach((members) =>
+      this.io
+        .to(members.toString())
+        .emit('inviteRoom', { name: 'Room deleted', roomId: room._id }),
+    );
+  }
+
   @SubscribeMessage('acceptInvite')
   async onAcceptInvite(
     @MessageBody() data: any,
@@ -174,7 +191,9 @@ export class ChatGateway
     if (delUser === 'NoDelUsers') {
       this.io.to(id).emit('error', delUser);
     } else {
-      this.io.to(delUser).emit('infoDeleteRoom', room._id);
+      this.io
+        .to(delUser)
+        .emit('infoDeleteRoom', { name: 'ban', roomId: room._id });
     }
 
     this.messageToClient(data.roomId, message);
@@ -183,21 +202,36 @@ export class ChatGateway
 
   @SubscribeMessage('openRoom')
   async onOpenRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
-    const messages = await this.messageService.getAllRoomMessage(data.roomId);
-    this.io.to(id).emit('allRoomMessages', messages);
+    const { roomId } = data;
+
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room.membersId.includes(id)) {
+      this.io.to(id).emit('error', 'You are not a member of this room');
+    } else {
+      const messages = await this.messageService.getAllRoomMessage(roomId);
+      this.io.to(id).emit('allRoomMessages', messages);
+    }
   }
 
   @SubscribeMessage('addMessage')
   async onAddMessage(@MessageBody() data: any, @UserIdInToken() id: string) {
-    const message = await this.messageService.add(
-      id,
-      data.roomId,
-      data.text,
-      data.tags,
-      data.voice,
-    );
+    const { roomId, text, tags, voice } = data;
 
-    this.messageToClient(data.roomId, message);
+    const room = await this.roomService.getRoomById(roomId);
+
+    if (!room.membersId.includes(id)) {
+      this.io.to(id).emit('error', 'You are not a member of this room');
+    } else {
+      const message = await this.messageService.add(
+        id,
+        roomId,
+        text,
+        tags,
+        voice,
+      );
+
+      this.messageToClient(roomId, message);
+    }
   }
 
   private messageToClient(roomId: string, message: Message) {
