@@ -17,6 +17,15 @@ import { UserIdInToken } from 'src/common/decorators/userId.decorator';
 import { RoomService } from 'src/room/room.service';
 import { Message } from 'src/message/schemas/message.schema';
 import { Room } from 'src/room/schema/room.schema';
+import {
+  AddUsersDto,
+  ChangeAvatarRoomDto,
+  ChangeNameRoomDto,
+  CreateRoomDto,
+  DeleteUserDto,
+  MessageDto,
+  RoomIdDto,
+} from './dto/data.dto';
 
 const users = {};
 
@@ -61,11 +70,13 @@ export class ChatGateway
 
   @SubscribeMessage('createRoom')
   async onCreateRoom(
-    @MessageBody() data: any,
+    @MessageBody() data: CreateRoomDto,
     @ConnectedSocket() client: Socket,
     @UserIdInToken() id: string,
   ) {
-    const room = await this.roomService.create(id, data.name, data.users);
+    const { name, users } = data;
+
+    const room = await this.roomService.create(id, name, users);
 
     client.join(room._id.toString());
 
@@ -76,8 +87,7 @@ export class ChatGateway
 
   @SubscribeMessage('deleteRoom')
   async onDeleteRoom(
-    @MessageBody() data: any,
-    @ConnectedSocket() client: Socket,
+    @MessageBody() data: RoomIdDto,
     @UserIdInToken() id: string,
   ) {
     const { roomId } = data;
@@ -87,13 +97,44 @@ export class ChatGateway
     room.membersId.forEach((members) =>
       this.io
         .to(members.toString())
-        .emit('inviteRoom', { name: 'Room deleted', roomId: room._id }),
+        .emit('infoDeleteRoom', { name: 'Room deleted', roomId: room._id }),
     );
+  }
+
+  @SubscribeMessage('changeNameRoom')
+  async onChangeNameRoom(
+    @MessageBody() data: ChangeNameRoomDto,
+    @UserIdInToken() id: string,
+  ) {
+    const { roomId, name } = data;
+    await this.roomService.changeName(id, roomId, name);
+    await this.sendInfoRoom(roomId);
+  }
+
+  @SubscribeMessage('changeAvatarRoom')
+  async onChangeAvatarRoom(
+    @MessageBody() data: ChangeAvatarRoomDto,
+    @UserIdInToken() id: string,
+  ) {
+    const { roomId, avatar } = data;
+    await this.roomService.changeAvatar(id, roomId, avatar);
+    await this.sendInfoRoom(roomId);
+  }
+
+  // TODO: this is not good function, because I think it is should happening in server
+  @SubscribeMessage('banOrDelete')
+  onBanOrDelete(
+    @MessageBody() data: RoomIdDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { roomId } = data;
+
+    client.leave(roomId);
   }
 
   @SubscribeMessage('acceptInvite')
   async onAcceptInvite(
-    @MessageBody() data: any,
+    @MessageBody() data: RoomIdDto,
     @ConnectedSocket() client: Socket,
     @UserIdInToken() id: string,
   ) {
@@ -116,7 +157,10 @@ export class ChatGateway
   }
 
   @SubscribeMessage('rejectInvite')
-  async onRejectInvite(@MessageBody() data: any, @UserIdInToken() id: string) {
+  async onRejectInvite(
+    @MessageBody() data: RoomIdDto,
+    @UserIdInToken() id: string,
+  ) {
     const { roomId } = data;
 
     await this.roomService.leaveRoom(id, roomId);
@@ -126,7 +170,7 @@ export class ChatGateway
 
   @SubscribeMessage('leaveRoom')
   async onLeaveRoom(
-    @MessageBody() data: any,
+    @MessageBody() data: RoomIdDto,
     @UserIdInToken() id: string,
     @ConnectedSocket() client: Socket,
   ) {
@@ -149,14 +193,15 @@ export class ChatGateway
   }
 
   @SubscribeMessage('addInRoom')
-  async onAddInRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
-    const newUsers = await this.roomService.addUsers(
-      id,
-      data.roomId,
-      data.users,
-    );
+  async onAddInRoom(
+    @MessageBody() data: AddUsersDto,
+    @UserIdInToken() id: string,
+  ) {
+    const { roomId, users } = data;
 
-    const room = await this.roomService.getRoomById(data.roomId);
+    const newUsers = await this.roomService.addUsers(id, roomId, users);
+
+    const room = await this.roomService.getRoomById(roomId);
 
     if (newUsers === 'NoNewUsers') {
       this.io.to(id).emit('error', newUsers);
@@ -169,21 +214,19 @@ export class ChatGateway
     this.io.to(id).emit('infoRoom', room);
   }
 
-  @SubscribeMessage('onRemoveFromRoom')
+  @SubscribeMessage('removeFromRoom')
   async onRemoveFromRoom(
-    @MessageBody() data: any,
+    @MessageBody() data: DeleteUserDto,
     @UserIdInToken() id: string,
   ) {
-    const delUser = await this.roomService.deleteUser(
-      id,
-      data.roomId,
-      data.user,
-    );
+    const { roomId, userId } = data;
 
-    const room = await this.roomService.getRoomById(data.roomId);
+    const delUser = await this.roomService.deleteUser(id, roomId, userId);
+
+    const room = await this.roomService.getRoomById(roomId);
     const message = await this.messageService.add(
       id,
-      data.roomId,
+      roomId,
       'User has been deleted',
       [{ role: 'system' }],
     );
@@ -196,12 +239,15 @@ export class ChatGateway
         .emit('infoDeleteRoom', { name: 'ban', roomId: room._id });
     }
 
-    this.messageToClient(data.roomId, message);
+    this.messageToClient(roomId, message);
     await this.sendInfoRoom(room._id);
   }
 
   @SubscribeMessage('openRoom')
-  async onOpenRoom(@MessageBody() data: any, @UserIdInToken() id: string) {
+  async onOpenRoom(
+    @MessageBody() data: RoomIdDto,
+    @UserIdInToken() id: string,
+  ) {
     const { roomId } = data;
 
     const room = await this.roomService.getRoomById(roomId);
@@ -214,7 +260,10 @@ export class ChatGateway
   }
 
   @SubscribeMessage('addMessage')
-  async onAddMessage(@MessageBody() data: any, @UserIdInToken() id: string) {
+  async onAddMessage(
+    @MessageBody() data: MessageDto,
+    @UserIdInToken() id: string,
+  ) {
     const { roomId, text, tags, voice } = data;
 
     const room = await this.roomService.getRoomById(roomId);
