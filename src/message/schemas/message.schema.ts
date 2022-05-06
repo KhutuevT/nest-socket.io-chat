@@ -19,7 +19,7 @@ export class Message {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true })
   room: Room;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   text: string;
 
   @Prop({ required: false })
