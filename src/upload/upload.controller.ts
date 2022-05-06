@@ -26,7 +26,7 @@ export class UploadController {
         },
       }),
       fileFilter: (_, file, cb) => {
-        if (file.mimetype === 'audio/webm') {
+        if (file.mimetype === 'audio/webm' || file.mimetype === 'video/webm') {
           cb(null, true);
         } else {
           cb(null, false);

@@ -18,7 +18,6 @@ import { MessageService } from 'src/message/message.service';
 import { UserIdInToken } from 'src/common/decorators/userId.decorator';
 import { RoomService } from 'src/room/room.service';
 import { Message } from 'src/message/schemas/message.schema';
-import { Room } from 'src/room/schema/room.schema';
 import {
   AddUsersDto,
   ChangeAvatarRoomDto,

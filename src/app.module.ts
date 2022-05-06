@@ -13,6 +13,7 @@ import { TokenModule } from './token/token.module';
 import { MessageModule } from './message/message.module';
 import { UploadModule } from './upload/upload.module';
 import { UserModule } from './user/user.module';
+import { WritingStatusModule } from './writing-status/writing-status.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { UserModule } from './user/user.module';
     TokenModule,
     AuthModule,
     UploadModule,
-    UserModule
+    UserModule,
+    WritingStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
