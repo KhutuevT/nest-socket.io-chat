@@ -14,7 +14,7 @@ import { RoomDto } from './room.dto';
 import { RoomService } from './room.service';
 
 const ownerId = '6267fd30aa12046c135ecb9b';
-const roomId = '626b9b1f34641a59dfd6b1e3';
+const roomId = '627376b652dd887e8100a521';
 
 @Controller('room')
 export class RoomController {
