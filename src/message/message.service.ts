@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Message, MessageDocument, Tag } from './schemas/message.schema';
@@ -11,7 +11,9 @@ export class MessageService {
   ) {}
 
   async add(userId: string, roomId: string, text: string, tags?: Tag[], voice?: string) {
-    try {
+      if (!(text || voice)) throw new BadRequestException(`message object must contain text or voice!`);
+      if (text && voice) throw new BadRequestException(`message can't contain both text and voice!`); 
+      try {
       const message = await this.messageModel.create({
         user: userId,
         room: roomId,
