@@ -15,7 +15,7 @@ export class Room {
   avatar: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  ownerId: string | User | any;
+  ownerId: any;
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', sparse: true }],
