@@ -4,6 +4,6 @@ import { WritingStatusController } from './writing-status.controller';
 
 @Module({
   controllers: [WritingStatusController],
-  providers: [WritingStatusService]
+  providers: [WritingStatusService],
 })
 export class WritingStatusModule {}

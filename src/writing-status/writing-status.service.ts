@@ -8,7 +8,7 @@ redis.connect();
 @Injectable()
 export class WritingStatusService {
   async create(id: string) {
-    redis.set(id,'writing');
+    redis.set(id, 'writing');
     return `writing status for user ${id} successful added`;
   }
 

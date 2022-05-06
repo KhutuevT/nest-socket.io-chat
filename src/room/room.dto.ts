@@ -1,4 +1,4 @@
-import { IsArray, Length } from "class-validator";
+import { IsArray, Length } from 'class-validator';
 
 export class RoomDto {
   @Length(1)
