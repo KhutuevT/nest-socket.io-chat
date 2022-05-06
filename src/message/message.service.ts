@@ -10,14 +10,20 @@ export class MessageService {
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
   ) {}
 
-  async add(userId: string, roomId: string, text: string, tags?: Tag[], voice?: string) {
+  async add(
+    userId: string,
+    roomId: string,
+    text: string,
+    tags?: Tag[],
+    voice?: string,
+  ) {
     try {
       const message = await this.messageModel.create({
         user: userId,
         room: roomId,
         text,
         tags,
-        voice
+        voice,
       });
 
       const newMessage = await this.messageModel

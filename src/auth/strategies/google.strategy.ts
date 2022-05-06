@@ -13,11 +13,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     let googleCallbackURL = process.env.DEV_GOOGLE_CALLBACK_URL;
     let googleClientID = process.env.DEV_GOOGLE_CLIENT_ID;
     let googleSecret = process.env.DEV_GOOGLE_SECRET;
-    if (process.env.ENVIRONMENT === 'PROD'){
+    if (process.env.ENVIRONMENT === 'PROD') {
       googleCallbackURL = process.env.PROD_GOOGLE_CALLBACK_URL;
       googleClientID = process.env.PROD_GOOGLE_CLIENT_ID;
       googleSecret = process.env.PROD_GOOGLE_SECRET;
-    } 
+    }
     super({
       clientID: googleClientID,
       clientSecret: googleSecret,

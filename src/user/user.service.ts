@@ -7,9 +7,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class UserService {
-   constructor(
-     @InjectModel(User.name) private userModel: Model<UserDocument>,
-   ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findOne(id: string) {
     const user = await this.userModel.findById(id);
@@ -17,15 +15,17 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-
     const toUpdateObject = {
       firstName: updateUserDto.firstName,
       lastName: updateUserDto.lastName,
       email: updateUserDto.email,
-      avatar: updateUserDto.avatar
-    }
+      avatar: updateUserDto.avatar,
+    };
 
-    const updatedUser = await this.userModel.updateOne({_id: id}, toUpdateObject);
+    const updatedUser = await this.userModel.updateOne(
+      { _id: id },
+      toUpdateObject,
+    );
 
     return updatedUser;
   }

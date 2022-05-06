@@ -25,7 +25,7 @@ import { WritingStatusModule } from './writing-status/writing-status.module';
     AuthModule,
     UploadModule,
     UserModule,
-    WritingStatusModule
+    WritingStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
