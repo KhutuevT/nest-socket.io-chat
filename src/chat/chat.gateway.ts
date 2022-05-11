@@ -34,8 +34,8 @@ redis.connect();
 
 const ACCESS_KEY = process.env.JWT_ACCESS_KEY || '';
 
-const getIdFromToken = (req) => {
-  const authHeader = req.handshake.headers.authorization;
+const getIdFromToken = (client: Socket) => {
+  const authHeader = client.handshake.headers.authorization;
   if (!authHeader) throw new Error('Not Header Auth');
 
   const token = authHeader.split('Bearer ')[1];
